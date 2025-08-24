@@ -68,7 +68,6 @@ namespace ToDoList.src
 
         public ToDo? GetToDoById(string table, long id)
         {
-            List<ToDo> todo_list = new List<ToDo>();
             try
             {
                 _connection.Open();
@@ -88,18 +87,17 @@ namespace ToDoList.src
                         string? author;
                         if (reader.IsDBNull(2)) description = null; else description = reader.GetString(2);
                         if (reader.IsDBNull(3)) author = null; else author = reader.GetString(3);
-                        todo_list.Add(new ToDo(
+                        return new ToDo(
                             id,
                             title,
                             description,
-                            author));
+                            author);
                     }
                 }
             }
             catch (IndexOutOfRangeException)
             {
                 Console.WriteLine("Такого id несуществует");
-                return null;
             }
             catch (Exception ex)
             {
@@ -109,7 +107,7 @@ namespace ToDoList.src
             {
                 _connection.Close();
             }
-            return todo_list.ToArray()[0];
+            return null;
         }
     }
 }
