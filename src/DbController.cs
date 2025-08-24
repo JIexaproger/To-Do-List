@@ -28,6 +28,9 @@ namespace ToDoList.src
                 command.Parameters.AddWithValue("@title", title);
                 command.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@author", author ?? (object)DBNull.Value);
+
+                command.ExecuteNonQuery();
+                Console.WriteLine($"Строка успешно добавлена. {title}, {description}, {author}");
             }
             catch (Exception ex)
             {
