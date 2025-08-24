@@ -50,7 +50,7 @@ namespace ToDoList.src
                 _connection.Open();
                 var command = _connection.CreateCommand();
                 command.CommandText = @"
-                DELETE FROM @table;";
+                TRUNCATE TABLE @table RESTART IDENTITY;";
                 command.Parameters.AddWithValue("@table", table);
                 command.ExecuteNonQuery();
                 Console.WriteLine("Отчистка успешно заверешна");
@@ -65,21 +65,6 @@ namespace ToDoList.src
             }
         }
 
-        private void ResetSequence(long resetId)
-        {
-            try
-            {
-                _connection.Open();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Ошибка при сбросе автоинкремента id: " + ex.Message);
-            }
-            finally
-            {
-                _connection.Close();
-            }
-        }
 
         public ToDo[] GetToDo(long todo_Id)
         {
