@@ -24,7 +24,8 @@ namespace ToDoList.src
                 var command = _connection.CreateCommand();
                 command.CommandText = @"
                 INSERT INTO @table (title, description, author)
-                VALUES (@title, @description, @author)";
+                VALUES (@title, @description, @author);";
+                command.Parameters.AddWithValue("@table", table);
                 command.Parameters.AddWithValue("@title", title);
                 command.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@author", author ?? (object)DBNull.Value);
@@ -42,11 +43,17 @@ namespace ToDoList.src
             }
         }
 
-        public void Clear()
+        public void Clear(string table)
         {
             try
             {
                 _connection.Open();
+                var command = _connection.CreateCommand();
+                command.CommandText = @"
+                DELETE FROM @table;";
+                command.Parameters.AddWithValue("@table", table);
+                command.ExecuteNonQuery();
+                Console.WriteLine("Отчистка успешно заверешна");
             }
             catch (Exception ex)
             {
