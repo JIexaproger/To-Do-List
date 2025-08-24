@@ -1,57 +1,90 @@
-using Microsoft.Data.Sqlite;
-using ToDoList.src;
+using System.Threading.Tasks;
+using Npgsql;
 
-namespace App.src
+namespace ToDoList.src
 {
     public class DbController
     {
-        private SqliteConnection _connection;
+        private string _connectionString;
+        private NpgsqlConnection _connection;
 
-        public DbController(string dbPath)
+        public DbController(string connectionString)
         {
-            _connection = new SqliteConnection("Data Source=" + dbPath);
+            _connectionString = connectionString;
+            _connection = new NpgsqlConnection(_connectionString);
 
         }
 
-        public void Connect()
+
+        public void Add(string table, string title, string? description = null, string? author = null)
         {
-            _connection.Open();
-        }
-
-        public void Disconnect()
-        {
-            _connection.Close();
-        }
-
-        public void Add(string title, string? description, string? author)
-        {
-            using var command = _connection.CreateCommand();
-            command.CommandText = @"
-                INSERT INTO Users (title, description, author)
-                VALUES ($title, $description, $author)";
-
-            command.Parameters.AddWithValue("$title", title);
-            command.Parameters.AddWithValue("$description", description);
-            command.Parameters.AddWithValue("$author", author);
-
-            command.ExecuteNonQuery();
-        }
-
-        public ToDo? GetToDo(Int64 toDoId)
-        {
-            using var command = _connection.CreateCommand();
-            command.CommandText = "SELECT Id, Name, Age FROM Users";
-            using var reader = command.ExecuteReader();
-
-            while (reader.Read())
+            try
             {
-                int id = reader.GetInt32(0);
-                string title = reader.GetString(1);
-                string? description = reader.GetString(1);
-                string? author = reader.GetString(1);
-                return new ToDo(id, title, description, author);
+                _connection.Open();
+                var command = _connection.CreateCommand();
+                command.CommandText = @"
+                INSERT INTO @table (title, description, author)
+                VALUES (@title, @description, @author)";
+                command.Parameters.AddWithValue("@title", title);
+                command.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@author", author ?? (object)DBNull.Value);
             }
-            return null;
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка при добавлении: " + ex.Message);
+            }
+            finally
+            {
+                _connection.Close();
+            }
+        }
+
+        public void Clear()
+        {
+            try
+            {
+                _connection.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка при отчистке: " + ex.Message);
+            }
+            finally
+            {
+                _connection.Close();
+            }
+        }
+
+        private void ResetSequence(long resetId)
+        {
+            try
+            {
+                _connection.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка при сбросе автоинкремента id: " + ex.Message);
+            }
+            finally
+            {
+                _connection.Close();
+            }
+        }
+
+        public ToDo[] GetToDo(long todo_Id)
+        {
+            try
+            {
+                _connection.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при получении задачи по id={todo_Id}: " + ex.Message);
+            }
+            finally
+            {
+                _connection.Close();
+            }
         }
     }
 }
