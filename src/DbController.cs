@@ -22,13 +22,13 @@ namespace ToDoList.src
             {
                 _connection.Open();
                 var command = _connection.CreateCommand();
-                command.CommandText = @"
-                INSERT INTO @table (title, description, author)
+                command.CommandText = $@"
+                INSERT INTO {table} (title, description, author)
                 VALUES (@title, @description, @author);";
-                command.Parameters.AddWithValue("@table", table);
-                command.Parameters.AddWithValue("@title", title);
-                command.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@author", author ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("table", table);
+                command.Parameters.AddWithValue("title", title);
+                command.Parameters.AddWithValue("description", description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("author", author ?? (object)DBNull.Value);
 
                 command.ExecuteNonQuery();
                 Console.WriteLine($"Строка успешно добавлена. {title}, {description}, {author}");
@@ -49,9 +49,9 @@ namespace ToDoList.src
             {
                 _connection.Open();
                 var command = _connection.CreateCommand();
-                command.CommandText = @"
-                TRUNCATE TABLE @table RESTART IDENTITY;";
-                command.Parameters.AddWithValue("@table", table);
+                command.CommandText = $@"
+                TRUNCATE TABLE {table} RESTART IDENTITY;";
+                command.Parameters.AddWithValue("table", table);
                 command.ExecuteNonQuery();
                 Console.WriteLine("Отчистка успешно заверешна");
             }
@@ -66,20 +66,50 @@ namespace ToDoList.src
         }
 
 
-        public ToDo[] GetToDo(long todo_Id)
+        public ToDo? GetToDoById(string table, long id)
         {
+            List<ToDo> todo_list = new List<ToDo>();
             try
             {
                 _connection.Open();
+                var command = _connection.CreateCommand();
+                command.CommandText = $@"
+                SELECT id, title, description, author FROM {table}
+                WHERE id = @id";
+                command.Parameters.AddWithValue("@table", table);
+                command.Parameters.AddWithValue("@id", id);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var title = reader.GetString(1);
+                        string? description;
+                        string? author;
+                        if (reader.IsDBNull(2)) description = null; else description = reader.GetString(2);
+                        if (reader.IsDBNull(3)) author = null; else author = reader.GetString(3);
+                        todo_list.Add(new ToDo(
+                            id,
+                            title,
+                            description,
+                            author));
+                    }
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Console.WriteLine("Такого id несуществует");
+                return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при получении задачи по id={todo_Id}: " + ex.Message);
+                Console.WriteLine($"Ошибка при получении задачи по id={id}: " + ex.Message);
             }
             finally
             {
                 _connection.Close();
             }
+            return todo_list.ToArray()[0];
         }
     }
 }
