@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Npgsql;
 
 namespace ToDoList.src
@@ -66,7 +65,7 @@ namespace ToDoList.src
         }
 
 
-        public ToDo? GetToDoById(string table, long id)
+        public Note? GetToDoById(string table, long id)
         {
             try
             {
@@ -87,7 +86,7 @@ namespace ToDoList.src
                         string? author;
                         if (reader.IsDBNull(2)) description = null; else description = reader.GetString(2);
                         if (reader.IsDBNull(3)) author = null; else author = reader.GetString(3);
-                        return new ToDo(
+                        return new Note(
                             id,
                             title,
                             description,

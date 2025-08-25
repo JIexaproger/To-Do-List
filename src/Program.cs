@@ -1,7 +1,4 @@
-﻿using System.IO.Compression;
-using System.Threading.Tasks;
-
-namespace ToDoList.src
+﻿namespace ToDoList.src
 {
     class Program
     {
@@ -9,22 +6,12 @@ namespace ToDoList.src
 
         static void Main(string[] args)
         {
-            dbController.Clear("tasks");
 
-            dbController.Add("tasks", "Hello", "null1", "VS Code");
-            dbController.Add("tasks", "World!", "second part ' // commit ", "author24");
-            dbController.Add("tasks", "empty", null, "JIEXA");
-            dbController.Add("tasks", "lol", "null", "JIEXA");
-
-            for (int i = 1; i < 10; i++)
-            {
-                PrintToDoInfo(i);
-            }
         }
 
         private static void PrintToDoInfo(long id)
         {
-            var result = dbController.GetToDoById("tasks", id);
+            var result = dbController.GetToDoById("notes", id);
             if (result == null)
             {
                 Console.WriteLine($"Заметка с ID {id} не найдена");
